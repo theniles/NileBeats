@@ -1,0 +1,832 @@
+﻿<Window x:Class="NileBeats.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:NileBeats"
+        mc:Ignorable="d"
+        Title="NileBeats v1.1"
+        MinHeight="450"
+        MinWidth="800"
+        Background="Black"
+        x:Name="mainWnd"
+        Closed="mainWnd_Closed"
+        Icon="assets/music.png">
+    <Window.Resources>
+
+        <!--Colors-->
+        <Color x:Key="PanelBg">#222</Color>
+        <Color x:Key="PanelHoverBg">#333</Color>
+        <Color x:Key="ListItemHoverBg">#444</Color>
+        <Color x:Key="ListItemBg">#00444444</Color>
+        <Color x:Key="ListItemSelectedBg">#555</Color>
+        <Color x:Key="ButtonBg">#666</Color>
+        <Color x:Key="ButtonBgHover">#777</Color>
+        <Color x:Key="ButtonBgPress">#999</Color>
+        <SolidColorBrush x:Key="PanelBgBrush" Color="{StaticResource PanelBg}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ButtonBgBrush" Color="{StaticResource ButtonBg}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ButtonBgPressBrush" Color="{StaticResource ButtonBgPress}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ButtonBgHoverBrush" Color="{StaticResource ButtonBgHover}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ListItemBgHoverBrush" Color="{StaticResource ListItemHoverBg}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ListItemBgBrush" Color="{StaticResource ListItemBg}"></SolidColorBrush>
+        <SolidColorBrush x:Key="ListItemBgSelectedBrush" Color="{StaticResource ListItemBg}"></SolidColorBrush>
+
+        <sys:Double x:Key="playBtnThickness">3</sys:Double>
+
+        <!--Hover over stack panel-->
+        <Style TargetType="StackPanel" x:Key="HoverAnimateSp">
+            <Setter Property="Margin" Value="1,1,1,1"></Setter>
+            <Setter Property="Background" Value="{StaticResource PanelBgBrush}"></Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource PanelHoverBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource PanelBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--Hover over grid-->
+        <Style TargetType="Grid" x:Key="HoverAnimateGr">
+            <Setter Property="Margin" Value="1,1,1,1"></Setter>
+            <Setter Property="Background" Value="{StaticResource PanelBgBrush}"></Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource PanelHoverBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource PanelBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--Transparent list box. with selection?-->
+        <Style x:Key="ListBoxStyle" TargetType="ListBox">
+            <Setter Property="Margin" Value="1,1,1,1"></Setter>
+            <Setter Property="BorderThickness" Value="0"></Setter>
+            <Setter Property="Background" Value="Transparent"/>
+            <EventSetter Event="MouseDoubleClick" Handler="ListBox_MouseDoubleClick"></EventSetter>
+        </Style>
+
+        <!--dark vertical scroll viewer?-->
+        <Style x:Key="ScrollBarTrackThumb"
+        TargetType="{x:Type Thumb}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Grid x:Name="Grid">
+                            <Rectangle HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Width="Auto"
+                                Height="Auto"
+                                Fill="Transparent" />
+                            <Border x:Name="CornerScrollBarRectangle"
+                            CornerRadius="5"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Width="Auto"
+                            Height="Auto"
+                            Margin="0,1,0,1"
+                            Background="{TemplateBinding Background}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Tag"
+                                Value="Horizontal">
+                                <Setter TargetName="CornerScrollBarRectangle"
+                                Property="Width"
+                                Value="Auto" />
+                                <Setter TargetName="CornerScrollBarRectangle"
+                                Property="Height"
+                                Value="6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Stylus.IsFlicksEnabled"
+            Value="false" />
+            <Setter Property="Foreground"
+            Value="#ADABAB" />
+            <Setter Property="Background"
+            Value="Transparent" />
+            <Setter Property="Width"
+            Value="7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid x:Name="GridRoot"
+                        Width="7"
+                        Background="{TemplateBinding Background}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.00001*" />
+                            </Grid.RowDefinitions>
+                            <Track x:Name="PART_Track"
+                            Grid.Row="0"
+                            IsDirectionReversed="true"
+                            Focusable="false">
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb"
+                                    Background="{TemplateBinding Foreground}"
+                                    Style="{DynamicResource ScrollBarTrackThumb}" />
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton x:Name="PageUp"
+                                            Command="ScrollBar.PageDownCommand"
+                                            Opacity="0"
+                                            Focusable="false" />
+                                </Track.IncreaseRepeatButton>
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton x:Name="PageDown"
+                                            Command="ScrollBar.PageUpCommand"
+                                            Opacity="0"
+                                            Focusable="false" />
+                                </Track.DecreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger SourceName="Thumb"
+                                Property="IsMouseOver"
+                                Value="true">
+                                <Setter Value="{DynamicResource ButtonSelectBrush}"
+                                TargetName="Thumb"
+                                Property="Background" />
+                            </Trigger>
+                            <Trigger SourceName="Thumb"
+                                Property="IsDragging"
+                                Value="true">
+                                <Setter Value="{DynamicResource DarkBrush}"
+                                TargetName="Thumb"
+                                Property="Background" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled"
+                                Value="false">
+                                <Setter TargetName="Thumb"
+                                Property="Visibility"
+                                Value="Collapsed" />
+                            </Trigger>
+                            <Trigger Property="Orientation"
+                                Value="Horizontal">
+                                <Setter TargetName="GridRoot"
+                                Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="-90" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="PART_Track"
+                                Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="-90" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Width"
+                                Value="Auto" />
+                                <Setter Property="Height"
+                                Value="8" />
+                                <Setter TargetName="Thumb"
+                                Property="Tag"
+                                Value="Horizontal" />
+                                <Setter TargetName="PageDown"
+                                Property="Command"
+                                Value="ScrollBar.PageLeftCommand" />
+                                <Setter TargetName="PageUp"
+                                Property="Command"
+                                Value="ScrollBar.PageRightCommand" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--Transparent text in dark gray-->
+        <Style x:Key="TransText" TargetType="{x:Type TextBlock}">
+            <Setter Property="Margin" Value="3,3,3,1"></Setter>
+            <Setter Property="Foreground" Value="Silver"></Setter>
+        </Style>
+
+        <!--Button style-->
+        <Style TargetType="Button" x:Key="ButtonStyle">
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Foreground" Value="Silver"></Setter>
+            <Setter Property="Margin" Value="1,1,1,1"/>
+            <Setter Property="Background" Value="{StaticResource ButtonBgBrush}"/>
+            <Setter Property="Width" Value="auto"/>
+            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter 
+                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}" 
+                                VerticalAlignment="{TemplateBinding VerticalAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgHover}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgPress}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.25" FillBehavior="HoldEnd"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgHover}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5" FillBehavior="Stop"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--roudn btn style-->
+        <Style TargetType="Button" x:Key="RoundBtn">
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Foreground" Value="Silver"></Setter>
+            <Setter Property="Margin" Value="1,1,1,1"/>
+            <Setter Property="Background" Value="{StaticResource ButtonBgBrush}"/>
+            <Setter Property="Width" Value="auto"/>
+            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="5" Background="{TemplateBinding Background}">
+                            <ContentPresenter 
+                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}" 
+                                VerticalAlignment="{TemplateBinding VerticalAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgHover}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgPress}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.25" FillBehavior="HoldEnd"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ButtonBgHover}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5" FillBehavior="Stop"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--List box item style-->
+        <Style TargetType="ListBoxItem" x:Key="lbItemStyle">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Background" Value="{StaticResource ListItemBgBrush}"/>
+            <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"></EventSetter>
+            <EventSetter Event="MouseEnter" Handler="ListBox_MouseEnter"/>
+            <EventSetter Event="PreviewMouseRightButtonDown" Handler="ListBoxItem_MouseRightButtonDown"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ListItemHoverBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ListItemBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ListItemSelectedBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    To="{StaticResource ListItemHoverBg}" Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)" 
+                                    Duration="0:0:0.5" FillBehavior="Stop"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="Silver"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Margin" Value="1,1,1,1"></Setter>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"></Setter>
+            <Setter
+            Property="BorderThickness" Value="0"/>
+            <Setter Property="CaretBrush" Value="Gray"/>
+        </Style>
+
+        <Style x:Key="CheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Margin" Value="5,1,5,1"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Foreground" Value="Silver"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border VerticalAlignment="Center" Name="border" Background="#00C0C0C0">
+                                <Image x:Name="checkboxImage" Source="assets/normal.png" Width="16"/>
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Top"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkboxImage" Property="Source" Value="assets/check.png"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation 
+                                                Storyboard.TargetName="border" 
+                                                Storyboard.TargetProperty="Background.Color"
+                                                To="#77C0C0C0"
+                                                Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation 
+                                                Storyboard.TargetName="border" 
+                                                Storyboard.TargetProperty="Background.Color"
+                                                To="#00C0C0C0"
+                                                Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--slider style?-->
+        <Style TargetType="Slider" x:Key="SliderStyle">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" MinHeight="{TemplateBinding MinHeight}"/>
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+                            <Border Height="{TemplateBinding Height}" Background="Gray" CornerRadius="5" Grid.Row="1">
+                                <Track  Name="PART_Track">
+                                    <Track.Thumb>
+                                        <Thumb>
+                                            <Thumb.Style>
+                                                <Style TargetType="Thumb">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate>
+                                                                <Ellipse VerticalAlignment="Center" Name="ellipse" Fill="Silver" Width="10" Height="10">
+                                                                </Ellipse>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Thumb.Style>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="1,1,1,1">
+        <Grid.RowDefinitions>
+            <RowDefinition MinHeight="125px" />
+            <RowDefinition MinHeight="125px" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <!--The opened folder-->
+        <Grid Style="{StaticResource HoverAnimateGr}" Grid.Row="0" Grid.Column="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Click="Button_Click" Style="{StaticResource ButtonStyle}">
+                            <TextBlock Style="{StaticResource TransText}">
+                        Open folder
+                            </TextBlock>
+                        </Button>
+                        <Button Click="Button_Click_2" Style="{StaticResource ButtonStyle}">
+                            <TextBlock Style="{StaticResource TransText}">
+                            Queue &amp; shuffle
+                            </TextBlock>
+                        </Button>
+                        <Button Click="Button_Click_1" Style="{StaticResource ButtonStyle}">
+                            <TextBlock Style="{StaticResource TransText}">
+                            Clear queue
+                            </TextBlock>
+                        </Button>
+                        <Button Click="Button_Click_3" Style="{StaticResource ButtonStyle}">
+                            <TextBlock Style="{StaticResource TransText}">
+                            Queue selection
+                            </TextBlock>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource TransText}">
+                            Search songs ->
+                        </TextBlock>
+                        <TextBox Margin="1,4,1,1" VerticalAlignment="Center" Name="songSearchBox" Width="100" Style="{StaticResource TextBoxStyle}">
+                        </TextBox>
+                        <CheckBox IsChecked="{Binding ElementName=mainWnd, Path=LoopSong}" Style="{StaticResource CheckBoxStyle}">Loop song</CheckBox>
+                        <CheckBox IsChecked="{Binding ElementName=mainWnd, Path=LoopQueue}" Style="{StaticResource CheckBoxStyle}">Loop queue</CheckBox>
+                    </StackPanel>
+                </StackPanel>
+                <ListBox ScrollViewer.HorizontalScrollBarVisibility="Hidden" SelectionMode="Multiple" Grid.Row="1" Grid.Column="0" x:Name="openedFolderSongsLb" ItemsSource="{Binding ElementName=mainWnd, Path=OpenedFolderFiles}" Style="{StaticResource ListBoxStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Style="{StaticResource TransText}" Text="{Binding DisplayString}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource lbItemStyle}"/>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
+        </Grid>
+        <GridSplitter Grid.Row="1" 
+                      Background="LightGray"
+                      Focusable="False"
+              Grid.ColumnSpan="1" 
+              HorizontalAlignment="Stretch" 
+              VerticalAlignment="Top"
+              ShowsPreview="true"
+              ResizeDirection="Rows"
+              Height="3"/>
+        <!--The queued songs-->
+        <Grid Margin="1,5,1,1" Style="{StaticResource HoverAnimateGr}" Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Bottom" Style="{StaticResource TransText}">Queued Songs Volume:</TextBlock>
+                    <Slider ValueChanged="Slider_ValueChanged"
+                            Maximum="1" Minimum="0"
+                            Value="{Binding ElementName=mainWnd, Path=Volume}"
+                            Margin="5,3" Height="10" 
+                            VerticalAlignment="Bottom" 
+                            Style="{StaticResource SliderStyle}" 
+                            Width="100"></Slider>
+                    <Button Click="Button_Click_9" Style="{StaticResource ButtonStyle}">
+                        <TextBlock Style="{StaticResource TransText}">
+                            Help and about
+                        </TextBlock>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Click="Button_Click_7" Style="{StaticResource ButtonStyle}">
+                        <TextBlock Style="{StaticResource TransText}">
+                            Save queue
+                        </TextBlock>
+                    </Button>
+                    <Button Click="Button_Click_8" Style="{StaticResource ButtonStyle}">
+                        <TextBlock Style="{StaticResource TransText}">
+                            Load queue
+                        </TextBlock>
+                    </Button>
+                    <TextBlock Style="{StaticResource TransText}">
+                            Opened folder:
+                    </TextBlock>
+                    <TextBlock Text="{Binding ElementName=mainWnd, Path=OpenedFolderPath}" Style="{StaticResource TransText}">
+
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Click="Button_Click_4" Style="{StaticResource ButtonStyle}">
+                        <TextBlock Style="{StaticResource TransText}">
+                            Unqueue selection
+                        </TextBlock>
+                    </Button>
+                    <TextBlock x:Name="songDurTb" Style="{StaticResource TransText}"></TextBlock>
+                </StackPanel>
+            </StackPanel>
+            <ListBox ScrollViewer.HorizontalScrollBarVisibility="Hidden" Name="queuedSongsLb" SelectionMode="Multiple" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ElementName=mainWnd, Path=QueuedSongs}" Style="{StaticResource ListBoxStyle}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource lbItemStyle}"/>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <TextBlock Style="{StaticResource TransText}" Text="{Binding Song.DisplayString}"></TextBlock>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPlaying}" Value="true">
+                                            <Setter Property="BorderThickness" Value="3"></Setter>
+                                            <Setter Property="BorderBrush" Value="DarkGray"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+        <!--The currently playing song-->
+        <Grid Style="{StaticResource HoverAnimateGr}" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=".25*" />
+                    <ColumnDefinition Width=".25*" />
+                    <ColumnDefinition Width="64" />
+                    <ColumnDefinition Width=".25*" />
+                    <ColumnDefinition Width=".25*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height=".25*" />
+                    <RowDefinition Height=".25*" />
+                    <RowDefinition Height=".25*" />
+                    <RowDefinition Height=".25*" />
+                    <RowDefinition Height="64" />
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+
+                <Canvas x:Name="marqueeCv" ClipToBounds="True" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5">
+                    <TextBlock Name="currentSongTitle" FontSize="36" Text="{Binding ElementName=mainWnd, Path=CurrentSong.Song.Name}" Style="{StaticResource TransText}">
+                    </TextBlock>
+                </Canvas>
+
+                <!--dur slider-->
+                <Slider Height="10" Style="{StaticResource SliderStyle}" Thumb.DragStarted="songDurSlider_DragStarted" Thumb.DragCompleted="songDurSlider_DragCompleted" Maximum="1" Minimum="0"  Name="songDurSlider" Margin="5,1,5,1" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3">
+                </Slider>
+
+                <!--pause lines-->
+                <Path Grid.Column="2" Name="line1" Grid.Row="4" Stroke="Gray" StrokeThickness="{StaticResource playBtnThickness}">
+                    <Path.Data>
+                        <LineGeometry StartPoint="24,16" EndPoint="24,48"/>
+                    </Path.Data>
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=playEllipse, Path=IsMouseOver}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Silver" Duration="0:0:0.2" Storyboard.TargetProperty="(Path.Stroke).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Gray" Duration="0:0:0.2" Storyboard.TargetProperty="(Path.Stroke).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                <Path Grid.Column="2" Name="line2" Grid.Row="4" Stroke="Gray" StrokeThickness="{StaticResource playBtnThickness}">
+                    <Path.Data>
+                        <LineGeometry StartPoint="40,16" EndPoint="40,48"/>
+                    </Path.Data>
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=playEllipse, Path=IsMouseOver}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Silver" Duration="0:0:0.2" Storyboard.TargetProperty="(Path.Stroke).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Gray" Duration="0:0:0.2" Storyboard.TargetProperty="(Path.Stroke).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+
+                <!--play arrow-->
+
+                <Polygon Grid.Column="2" Name="triangle" Grid.Row="4" Points="20,16 20,48, 48,32" Fill="Gray">
+                    <Polygon.Style>
+                        <Style TargetType="Polygon">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=playEllipse, Path=IsMouseOver}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Silver" Duration="0:0:0.2" Storyboard.TargetProperty="(Polygon.Fill).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Gray" Duration="0:0:0.2" Storyboard.TargetProperty="(Polygon.Fill).(SolidColorBrush.Color)"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Polygon.Style>
+                </Polygon>
+
+                <!--ellipse?-->
+                <Path Name="playEllipse" MouseDown="Path_MouseDown" Grid.Column="2" Grid.Row="4" Fill="Gray">
+                    <Path.Data>
+                        <EllipseGeometry Center="32,32" RadiusX="31" RadiusY="31">
+
+                        </EllipseGeometry>
+                    </Path.Data>
+                    <!--<Path.Style>
+                        <Style TargetType="Path">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation To="0.5" Storyboard.TargetProperty="Opacity" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation To="0" Storyboard.TargetProperty="Opacity" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>-->
+                </Path>
+
+                <!--replay and skip tbns?-->
+                <Button Width="100" Click="Button_Click_5" Style="{StaticResource RoundBtn}" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="0">
+                    <TextBlock HorizontalAlignment="Center" FontSize="24" VerticalAlignment="Center" Style="{StaticResource ResourceKey=TransText}">
+                        Replay
+                    </TextBlock>
+                </Button>
+                <Button Click="Button_Click_6" Style="{StaticResource RoundBtn}" Width="100" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="3">
+                    <TextBlock HorizontalAlignment="Center" FontSize="24" VerticalAlignment="Center" Style="{StaticResource ResourceKey=TransText}">
+                        Skip
+                    </TextBlock>
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
